@@ -30,8 +30,17 @@ class HudScreen extends StatelessWidget {
                 children: [
                   TileLayer(
                     urlTemplate:
-                        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-                    subdomains: const ['a', 'b', 'c', 'd'],
+                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    subdomains: const ['a', 'b', 'c'],
+                    maxZoom: 19,
+                    userAgentPackageName: 'com.example.save_the_fuel',
+                  ),
+                  // Fallback endpoint for networks that block main OSM host.
+                  TileLayer(
+                    urlTemplate:
+                        'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+                    subdomains: const ['a', 'b', 'c'],
+                    maxZoom: 19,
                     userAgentPackageName: 'sugbo.save.mvp',
                   ),
                   if (state.pathTrail.length > 1)

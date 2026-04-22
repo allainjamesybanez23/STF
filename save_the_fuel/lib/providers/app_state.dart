@@ -37,6 +37,7 @@ class AppState extends ChangeNotifier {
   StreamSubscription<AccelerometerEvent>? _accelSub;
   Timer? _secondTicker;
   DateTime _lastMovement = DateTime.now();
+  DateTime _lastUiNotify = DateTime.fromMillisecondsSinceEpoch(0);
   ZoneType? _lastSpokenZone;
   final Map<int, double> hourlyNetIncome = {
     5: 40,
@@ -136,10 +137,16 @@ class AppState extends ChangeNotifier {
       );
 
       _secondTicker = Timer.periodic(const Duration(seconds: 1), (_) async {
+        var changed = false;
+        final previousPrompt = hudPrompt;
         if (activeZoneType == ZoneType.red) {
           redZoneSlowSeconds += 1;
+          changed = true;
         } else {
-          redZoneSlowSeconds = 0;
+          if (redZoneSlowSeconds != 0) {
+            redZoneSlowSeconds = 0;
+            changed = true;
+          }
         }
 
         if (activeZoneType == ZoneType.red && speedKph < 1 && isIdlingBySensor) {
@@ -147,10 +154,14 @@ class AppState extends ChangeNotifier {
           todayPhpSaved = SavingsTracker.idleLossPhp(idleSeconds);
           todayLitersSaved = SavingsTracker.litersSavedFromIdle(idleSeconds);
           await _persistStats();
+          changed = true;
         }
 
         _refreshPrompt();
-        notifyListeners();
+        if (previousPrompt != hudPrompt) changed = true;
+        if (changed) {
+          _notifyListenersThrottled(force: false);
+        }
       });
     } catch (error) {
       debugPrint('GPS init skipped: $error');
@@ -178,7 +189,7 @@ class AppState extends ChangeNotifier {
     _checkCheapestStationProximity();
     _refreshPrompt();
     _maybeSpeak();
-    notifyListeners();
+    _notifyListenersThrottled(force: false);
   }
 
   void _resolveZone(Position pos) {
@@ -301,6 +312,14 @@ class AppState extends ChangeNotifier {
   void verifyStation(int index) {
     stations[index] = stations[index].copyWith(verified: true);
     notifyListeners();
+  }
+
+  void _notifyListenersThrottled({required bool force}) {
+    final now = DateTime.now();
+    if (force || now.difference(_lastUiNotify).inMilliseconds >= 700) {
+      _lastUiNotify = now;
+      notifyListeners();
+    }
   }
 
   @override

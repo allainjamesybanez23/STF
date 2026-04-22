@@ -69,7 +69,7 @@ class _RootShellState extends State<_RootShell> {
       KitaScreen(),
     ];
     return Scaffold(
-      body: IndexedStack(index: _index, children: pages),
+      body: pages[_index],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (value) => setState(() => _index = value),

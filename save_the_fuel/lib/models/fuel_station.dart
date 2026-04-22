@@ -1,17 +1,15 @@
 import 'package:latlong2/latlong.dart';
 
-enum FuelType { diesel, ron91, ron95, ron97 }
+enum FuelType { diesel, gasoline, kerosene }
 
 String fuelTypeLabel(FuelType type) {
   switch (type) {
     case FuelType.diesel:
       return 'Diesel';
-    case FuelType.ron91:
-      return 'RON 91';
-    case FuelType.ron95:
-      return 'RON 95';
-    case FuelType.ron97:
-      return 'RON 97';
+    case FuelType.gasoline:
+      return 'Gasoline';
+    case FuelType.kerosene:
+      return 'Kerosene';
   }
 }
 
